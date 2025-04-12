@@ -11,6 +11,7 @@ private const val DEFAULT_SIZE_BITS = 32
 
 class IndexReader(file: File, info: InfoReader) {
 
+    // TODO: Change this into a list (assume sorted) and use binary search
     val words = HashMap<String, Pair<Long, Int>>()
 
     init {

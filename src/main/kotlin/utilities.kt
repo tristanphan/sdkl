@@ -11,3 +11,12 @@ fun bigEndianByteArrayToLong(byteArray: ByteArray): Long {
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     return buffer.getLong()
 }
+
+fun longToBigEndianByteArray(long: Long, arraySize: Int): ByteArray {
+    val buffer = ByteBuffer.allocate(8)
+    // Using little endian because it will be reversed soon
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.putLong(long)
+    val byteArray = buffer.array().copyOf(arraySize).reversedArray()
+    return byteArray
+}
