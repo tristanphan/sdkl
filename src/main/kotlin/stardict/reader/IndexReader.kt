@@ -1,17 +1,17 @@
 package com.tristanphan.stardict.reader
 
-import com.tristanphan.bigEndianByteArrayToLong
 import com.tristanphan.stardict.StarDictVersion
+import com.tristanphan.utilities.bigEndianByteArrayToLong
 import java.io.EOFException
 import java.io.File
-import java.io.FileInputStream
+import java.io.InputStream
 
 private const val DEFAULT_OFFSET_BITS = 32
 private const val DEFAULT_SIZE_BITS = 32
 
-class IndexReader(file: File, info: InfoReader) {
+class IndexReader(file: File, info: InfoReader) : Iterable<String> {
 
-    // TODO: Change this into a list (assume sorted) and use binary search
+    // TODO: Change this into a TreeMap or list (assume already sorted) and use binary search
     val words = HashMap<String, Pair<Long, Int>>()
 
     init {
@@ -21,8 +21,13 @@ class IndexReader(file: File, info: InfoReader) {
         val offsetBytes = offsetBits / 8
         val sizeBytes = DEFAULT_SIZE_BITS / 8
 
-        file.inputStream().use { inputStream ->
+        var elementCount = 0
+        file.inputStream().buffered(bufferSize = 2_097_152).use { inputStream ->
             while (true) {
+                ++elementCount
+                if (elementCount % 100_000 == 0) {
+                    System.err.print(String.format("Parsing index progress: %,d\r", elementCount))
+                }
                 try {
                     val word = readNullTerminatedWord(inputStream)
                     val offsetByteArray = readNBytesWithEOF(inputStream, offsetBytes)
@@ -36,20 +41,25 @@ class IndexReader(file: File, info: InfoReader) {
             }
         }
     }
+
+    override fun iterator(): Iterator<String> = iterator {
+        yieldAll(elements = words.keys)
+    }
 }
 
-private fun readNullTerminatedWord(stream: FileInputStream): String {
-    val bytes = ArrayList<Byte>()
+private fun readNullTerminatedWord(stream: InputStream): String {
+    val bytes = ArrayList<Byte>(256)
     while (true) {
-        val byte = readNBytesWithEOF(stream, 1)[0]
-        if (byte == 0x0.toByte()) break
-        bytes.add(byte)
+        val byte = stream.read()
+        if (byte == -1) throw EOFException()
+        if (byte == 0x0) break
+        bytes.add(byte.toByte())
     }
     val byteArray: ByteArray = bytes.toByteArray()
     return String(byteArray)
 }
 
-private fun readNBytesWithEOF(stream: FileInputStream, n: Int): ByteArray {
+private fun readNBytesWithEOF(stream: InputStream, n: Int): ByteArray {
     val byteArray = stream.readNBytes(n)
     if (byteArray.size != n) throw EOFException()
     return byteArray

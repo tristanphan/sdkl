@@ -27,15 +27,21 @@ class StarDictWriter(
     private val index: IndexWriter = IndexWriter(idxFile, info)
     private val dictionary: DictWriter = DictWriter(dictFile, info)
 
-    fun addWord(word: String, definitions: HashMap<TypeIdentifier, String>) {
-        ++info.wordcount
+    fun addWord(word: String, definitions: Map<TypeIdentifier, String>) {
         val (offset, size) = dictionary.addWord(definitions)
         index.addWord(word, offset, size)
     }
 
+    fun addAlias(originalWord: String, newWord: String) {
+        index.addAlias(originalWord, newWord)
+    }
+
     fun finish() {
-        val indexFileSize = index.write()
+        val (indexFileSize, wordCount) = index.write()
         info.idxfilesize = indexFileSize
+        info.wordcount = wordCount
         info.write()
+        dictionary.finish()
+        System.err.println("Successfully generated StarDict file!")
     }
 }

@@ -1,46 +1,36 @@
 package com.tristanphan.stardict.reader
 
-import com.tristanphan.bigEndianByteArrayToLong
 import com.tristanphan.stardict.TypeIdentifier
+import com.tristanphan.utilities.BufferedRandomAccessFile
+import com.tristanphan.utilities.bigEndianByteArrayToLong
 import java.io.File
 import java.io.RandomAccessFile
+import java.util.*
 
 private const val SIZE_BITS = 32
 
-class DictReader(file: File, info: InfoReader) {
-    private val dictFile: File = file
+class DictReader(dictFile: File, info: InfoReader) {
     private val info: InfoReader = info
+    private val file: RandomAccessFile = BufferedRandomAccessFile(dictFile)
 
-    fun lookup(offset: Long, size: Int): HashMap<TypeIdentifier, String> {
-        useFile { file ->
-            return if (info.sametypesequence != null) readWithPredefinedTypeSequence(
-                file,
-                offset,
-                offset + size,
-                info.sametypesequence
-            )
-            else readWithInlineTypeSequence(
-                file,
-                offset,
-                offset + size,
-            )
-        }
-    }
-
-    private inline fun <R> useFile(block: (RandomAccessFile) -> R): R {
-        val file = RandomAccessFile(dictFile, "r")
-        file.use { f ->
-            return block(f)
-        }
+    fun lookup(offset: Long, size: Int): Map<TypeIdentifier, String> {
+        return if (info.sametypesequence != null) readWithPredefinedTypeSequence(
+            offset,
+            offset + size,
+            info.sametypesequence
+        )
+        else readWithInlineTypeSequence(
+            offset,
+            offset + size,
+        )
     }
 
     private fun readWithPredefinedTypeSequence(
-        file: RandomAccessFile,
         startPosition: Long,
         endPosition: Long,
         sequence: List<TypeIdentifier>,
-    ): HashMap<TypeIdentifier, String> {
-        val definitions = HashMap<TypeIdentifier, String>()
+    ): Map<TypeIdentifier, String> {
+        val definitions = EnumMap<TypeIdentifier, String>(TypeIdentifier::class.java)
         file.seek(startPosition)
         for (type in sequence) {
             assert(!definitions.containsKey(type)) {
@@ -48,16 +38,15 @@ class DictReader(file: File, info: InfoReader) {
             }
             val remainingCharactersAllotted = (endPosition - file.filePointer).toInt()
             // TODO: Maybe this should be ByteArray instead of String to allow for other types?
-            definitions[type] = String(readDataOfType(file, type, remainingCharactersAllotted))
+            definitions[type] = String(readDataOfType(type, remainingCharactersAllotted))
         }
         return definitions
     }
 
     private fun readWithInlineTypeSequence(
-        file: RandomAccessFile,
         startPosition: Long,
         endPosition: Long,
-    ): HashMap<TypeIdentifier, String> {
+    ): Map<TypeIdentifier, String> {
         file.seek(startPosition)
         // TODO: Implement the case where a sametypesequence is not provided
         // This should be calling [readDataOfType], just as [readWithPredefinedTypeSequence] does
@@ -66,19 +55,17 @@ class DictReader(file: File, info: InfoReader) {
     }
 
     private fun readDataOfType(
-        file: RandomAccessFile,
         type: TypeIdentifier,
         remainingCharactersAllotted: Int
     ): ByteArray {
         if (type.fieldIsNullTerminated()) {
             var charactersLeft = remainingCharactersAllotted
-            val character = ByteArray(1)
-            val byteList = ArrayList<Byte>()
+            val byteList = ArrayList<Byte>(256)
             while (charactersLeft > 0) {
-                file.read(character)
-                if (character[0] == 0x0.toByte()) break
+                val byte = file.read()
+                if (byte == 0x0) break
                 --charactersLeft
-                byteList.add(character[0])
+                byteList.add(byte.toByte())
             }
             return byteList.toByteArray()
         } else {

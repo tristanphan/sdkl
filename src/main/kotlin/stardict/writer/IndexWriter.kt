@@ -1,55 +1,70 @@
 package com.tristanphan.stardict.writer
 
-import com.tristanphan.longToBigEndianByteArray
 import com.tristanphan.stardict.StarDictVersion
+import com.tristanphan.utilities.caselessComparator
+import com.tristanphan.utilities.combineNavigableSets
+import com.tristanphan.utilities.longToBigEndianByteArray
 import java.io.File
 import java.io.FileOutputStream
+import java.util.*
 
 private const val DEFAULT_SIZE_BITS = 32
 
 class IndexWriter(val file: File, val info: InfoWriter) {
 
-    val words = HashMap<String, Pair<Long, Int>>()
+    val words = TreeMap<String, Pair<Long, Int>>(caselessComparator)
+    val aliases = TreeMap<String, String>(caselessComparator)
 
     fun addWord(word: String, offset: Long, size: Int) {
-        words[word] = Pair(offset, size)
+        val previousValue = words.put(word, Pair(offset, size))
+        assert(previousValue == null)
     }
 
-    fun write(): Int{
-        assert(info.version == StarDictVersion.V3_0_0 && info.idxoffsetbits == 64)
+    fun addAlias(originalWord: String, newWord: String) {
+        val previousValue = aliases.put(newWord, originalWord)
+        assert(previousValue == null)
+    }
+
+    /**
+     * Writes and finalizes the index file
+     * @return Pair(index file size, word count)
+     */
+    fun write(): Pair<Int, Int> {
+        assert(info.version == StarDictVersion.V3_0_0 && (info.idxoffsetbits ?: 32) == 32)
 
         val offsetBytes = (info.idxoffsetbits ?: 32) / 8
         val sizeBytes = DEFAULT_SIZE_BITS / 8
 
         file.delete()
         file.createNewFile()
-        var filesize = 0
-        for ((word, pair) in words.toSortedMap(caselessComparator)) {
-            val (offset, size) = pair
-            val wordByteArray = word.toByteArray()
-            val offsetByteArray = longToBigEndianByteArray(offset, offsetBytes)
-            val sizeByteArray = longToBigEndianByteArray(size.toLong(), sizeBytes)
+        var fileSize = 0
+        var wordCount = 0
+        val allWords = combineNavigableSets(words.navigableKeySet(), aliases.navigableKeySet())
+        FileOutputStream(file, true).buffered(bufferSize = 2_097_152).use { writer ->
+            for (word in allWords) {
+                val actualWordToConsider = aliases[word] ?: word
+                if (!words.contains(actualWordToConsider)) {
+                    System.err.println(
+                        "[Warning] Redirect target not found: \"$actualWordToConsider\"" +
+                                " (from \"$word\"). This may occur if the page is" +
+                                " outside the dump (e.g. different namespace)."
+                    )
+                    continue
+                }
+                val (offset, size) = words[actualWordToConsider]!!
 
-            FileOutputStream(file, true).use { writer ->
+                val wordByteArray = word.toByteArray()
+                val offsetByteArray = longToBigEndianByteArray(offset, offsetBytes)
+                val sizeByteArray = longToBigEndianByteArray(size.toLong(), sizeBytes)
+
                 writer.write(wordByteArray)
                 writer.write(byteArrayOf(0x0.toByte()))
                 writer.write(offsetByteArray)
                 writer.write(sizeByteArray)
+                ++wordCount
+                fileSize += wordByteArray.size + 1 + offsetByteArray.size + sizeByteArray.size
             }
-            filesize += wordByteArray.size + 1 + offsetByteArray.size + sizeByteArray.size
         }
-        return filesize
-    }
-}
-
-val caselessComparator = java.util.Comparator { s1: String, s2: String ->
-    val s1lowercase = s1.lowercase()
-    val s2lowercase = s1.lowercase()
-    if (s1lowercase > s2lowercase) return@Comparator 1
-    else if (s1lowercase < s2lowercase) return@Comparator -1
-    else {
-        if (s1 > s2) return@Comparator 1
-        else if (s1 < s2) return@Comparator -1
-        else return@Comparator 0
+        return Pair(fileSize, wordCount)
     }
 }

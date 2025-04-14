@@ -1,4 +1,4 @@
-package com.tristanphan
+package com.tristanphan.utilities
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -18,5 +18,8 @@ fun longToBigEndianByteArray(long: Long, arraySize: Int): ByteArray {
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putLong(long)
     val byteArray = buffer.array().copyOf(arraySize).reversedArray()
+    if (bigEndianByteArrayToLong(byteArray) != long) {
+        throw Exception("Long $long is too large for a ${arraySize}-byte array!")
+    }
     return byteArray
 }
