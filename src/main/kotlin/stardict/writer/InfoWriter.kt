@@ -26,6 +26,7 @@ class InfoWriter(
 
     fun write() {
         file.delete()
+        file.parentFile?.mkdirs()
         file.createNewFile()
         file.printWriter().use { writer ->
             writer.println(MAGIC_DATA)

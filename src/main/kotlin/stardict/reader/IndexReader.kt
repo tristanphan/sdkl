@@ -1,6 +1,7 @@
 package com.tristanphan.stardict.reader
 
 import com.tristanphan.stardict.StarDictVersion
+import com.tristanphan.utilities.ProgressTracker
 import com.tristanphan.utilities.bigEndianByteArrayToLong
 import java.io.EOFException
 import java.io.File
@@ -21,13 +22,12 @@ class IndexReader(file: File, info: InfoReader) : Iterable<String> {
         val offsetBytes = offsetBits / 8
         val sizeBytes = DEFAULT_SIZE_BITS / 8
 
-        var elementCount = 0
+        val progress = ProgressTracker(
+            "Loading index progress: ",
+            total = info.wordcount.toLong(),
+        )
         file.inputStream().buffered(bufferSize = 2_097_152).use { inputStream ->
             while (true) {
-                ++elementCount
-                if (elementCount % 100_000 == 0) {
-                    System.err.print(String.format("Parsing index progress: %,d\r", elementCount))
-                }
                 try {
                     val word = readNullTerminatedWord(inputStream)
                     val offsetByteArray = readNBytesWithEOF(inputStream, offsetBytes)
@@ -38,8 +38,10 @@ class IndexReader(file: File, info: InfoReader) : Iterable<String> {
                 } catch (_: EOFException) {
                     break
                 }
+                progress.increment()
             }
         }
+        progress.finish()
     }
 
     override fun iterator(): Iterator<String> = iterator {

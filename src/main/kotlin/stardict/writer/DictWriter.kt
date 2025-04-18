@@ -10,10 +10,12 @@ private const val SIZE_BITS = 32
 class DictWriter(file: File, info: InfoWriter) {
     private val info: InfoWriter = info
     private var filePosition: Long = 0
-    val openFile: BufferedOutputStream
+    private val openFile: BufferedOutputStream
 
     init {
         file.delete()
+        file.parentFile?.mkdirs()
+        file.createNewFile()
         openFile = file.outputStream().buffered(bufferSize = 2_097_152)
     }
 

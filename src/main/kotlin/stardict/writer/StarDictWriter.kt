@@ -1,31 +1,30 @@
 package com.tristanphan.stardict.writer
 
+import com.tristanphan.stardict.StarDictFile
 import com.tristanphan.stardict.TypeIdentifier
-import java.io.File
 
 class StarDictWriter(
-    ifoFile: File,
-    idxFile: File,
-    dictFile: File,
+    file: StarDictFile,
     bookname: String,
     description: String? = null,
     author: String? = null,
     email: String? = null,
     website: String? = null,
     date: String? = null,
+    sametypesequence: List<TypeIdentifier>? = null
 ) {
     private val info: InfoWriter = InfoWriter(
-        ifoFile,
+        file.info,
         bookname = bookname,
         description = description,
         author = author,
         email = email,
         website = website,
         date = date,
-        sametypesequence = listOf(TypeIdentifier.MEANING),
+        sametypesequence = sametypesequence,
     )
-    private val index: IndexWriter = IndexWriter(idxFile, info)
-    private val dictionary: DictWriter = DictWriter(dictFile, info)
+    private val index: IndexWriter = IndexWriter(file.index, info)
+    private val dictionary: DictWriter = DictWriter(file.dict, info)
 
     fun addWord(word: String, definitions: Map<TypeIdentifier, String>) {
         val (offset, size) = dictionary.addWord(definitions)
@@ -42,6 +41,6 @@ class StarDictWriter(
         info.wordcount = wordCount
         info.write()
         dictionary.finish()
-        System.err.println("Successfully generated StarDict file!")
+        System.err.println("Successfully generated StarDict file for ${info.bookname}!")
     }
 }

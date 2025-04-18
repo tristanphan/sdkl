@@ -1,11 +1,8 @@
 package com.tristanphan.utilities
 
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.RandomAccessFile
+import java.io.*
 
-const val BUFFER_SIZE = 256
+const val BUFFER_SIZE = 1024
 
 class BufferedRandomAccessFile(file: File) : RandomAccessFile(file, "r") {
 
@@ -25,6 +22,12 @@ class BufferedRandomAccessFile(file: File) : RandomAccessFile(file, "r") {
     }
 
     override fun seek(pos: Long) {
+        val difference: Long = pos - this.filePointer
+        if (difference >= 0 && difference < (BUFFER_SIZE - bufferPosition)) {
+            buffer.skipNBytes(difference)
+            bufferPosition += difference
+            return
+        }
         super.seek(pos)
         regenerateBuffer()
     }

@@ -18,6 +18,7 @@ class IndexWriter(val file: File, val info: InfoWriter) {
     fun addWord(word: String, offset: Long, size: Int) {
         val previousValue = words.put(word, Pair(offset, size))
         assert(previousValue == null)
+        // TODO: [Reader AND Writer] It should be possible for 2 entries to have the same word string
     }
 
     fun addAlias(originalWord: String, newWord: String) {
@@ -36,6 +37,7 @@ class IndexWriter(val file: File, val info: InfoWriter) {
         val sizeBytes = DEFAULT_SIZE_BITS / 8
 
         file.delete()
+        file.parentFile?.mkdirs()
         file.createNewFile()
         var fileSize = 0
         var wordCount = 0
