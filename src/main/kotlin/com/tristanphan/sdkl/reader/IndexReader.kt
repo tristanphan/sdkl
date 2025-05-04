@@ -1,8 +1,8 @@
-package com.tristanphan.stardict.reader
+package com.tristanphan.sdkl.reader
 
-import com.tristanphan.stardict.StarDictVersion
-import com.tristanphan.utilities.ProgressTracker
-import com.tristanphan.utilities.bigEndianByteArrayToLong
+import com.tristanphan.sdkl.StarDictVersion
+import com.tristanphan.sdkl.utilities.ProgressTracker
+import com.tristanphan.sdkl.utilities.bigEndianByteArrayToLong
 import java.io.EOFException
 import java.io.File
 import java.io.InputStream
@@ -10,10 +10,13 @@ import java.io.InputStream
 private const val DEFAULT_OFFSET_BITS = 32
 private const val DEFAULT_SIZE_BITS = 32
 
-class IndexReader(file: File, info: InfoReader) : Iterable<String> {
+internal class IndexReader(file: File, info: InfoReader) : Iterable<String> {
 
     // TODO: Change this into a TreeMap or list (assume already sorted) and use binary search
     val words = HashMap<String, Pair<Long, Int>>()
+
+    // Stores lowercase versions of terms that don't have a lowercase variant
+    val lowercaseWordsIfNotExist = HashMap<String, Pair<Long, Int>>()
 
     init {
         val offsetBits =
@@ -42,6 +45,12 @@ class IndexReader(file: File, info: InfoReader) : Iterable<String> {
             }
         }
         progress.finish()
+        for ((word, pair) in words) {
+            val lowercaseWord = word.lowercase()
+            if (word != lowercaseWord && !words.containsKey(lowercaseWord)) {
+                lowercaseWordsIfNotExist[lowercaseWord] = pair
+            }
+        }
     }
 
     override fun iterator(): Iterator<String> = iterator {

@@ -1,15 +1,15 @@
-package com.tristanphan.stardict.reader
+package com.tristanphan.sdkl.reader
 
-import com.tristanphan.stardict.TypeIdentifier
-import com.tristanphan.utilities.BufferedRandomAccessFile
-import com.tristanphan.utilities.bigEndianByteArrayToLong
+import com.tristanphan.sdkl.TypeIdentifier
+import com.tristanphan.sdkl.utilities.BufferedRandomAccessFile
+import com.tristanphan.sdkl.utilities.bigEndianByteArrayToLong
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.*
 
 private const val SIZE_BITS = 32
 
-class DictReader(dictFile: File, info: InfoReader) {
+internal class DictReader(dictFile: File, info: InfoReader) {
     private val info: InfoReader = info
     private val file: RandomAccessFile = BufferedRandomAccessFile(dictFile)
 

@@ -1,7 +1,8 @@
-package com.tristanphan.stardict.writer
+package com.tristanphan.sdkl
 
-import com.tristanphan.stardict.StarDictFile
-import com.tristanphan.stardict.TypeIdentifier
+import com.tristanphan.sdkl.writer.DictWriter
+import com.tristanphan.sdkl.writer.IndexWriter
+import com.tristanphan.sdkl.writer.InfoWriter
 
 class StarDictWriter(
     file: StarDictFile,

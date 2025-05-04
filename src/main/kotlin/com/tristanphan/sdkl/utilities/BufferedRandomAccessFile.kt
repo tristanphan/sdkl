@@ -1,10 +1,10 @@
-package com.tristanphan.utilities
+package com.tristanphan.sdkl.utilities
 
 import java.io.*
 
-const val BUFFER_SIZE = 1024
+private const val BUFFER_SIZE = 1024
 
-class BufferedRandomAccessFile(file: File) : RandomAccessFile(file, "r") {
+internal class BufferedRandomAccessFile(file: File) : RandomAccessFile(file, "r") {
 
     private var buffer: BufferedInputStream = BufferedInputStream(FileInputStream(this.fd), BUFFER_SIZE)
     private var bufferPosition: Long = 0

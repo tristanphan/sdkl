@@ -1,10 +1,10 @@
-package com.tristanphan.utilities
+package com.tristanphan.sdkl.utilities
 
 import java.io.PrintStream
 
 private const val ERASE = "\u001b[K"
 
-class ProgressTracker(
+internal class ProgressTracker(
     private val prefix: String,
     private val total: Long? = null,
     private val updateFrequency: Long = total?.div(100) ?: 1,

@@ -1,4 +1,4 @@
-package com.tristanphan.stardict
+package com.tristanphan.sdkl
 
 enum class StarDictVersion(val value: String) {
     V2_4_2("2.4.2"),

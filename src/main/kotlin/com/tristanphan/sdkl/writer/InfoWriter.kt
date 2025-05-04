@@ -1,14 +1,14 @@
-package com.tristanphan.stardict.writer
+package com.tristanphan.sdkl.writer
 
-import com.tristanphan.stardict.StarDictVersion
-import com.tristanphan.stardict.TypeIdentifier
-import com.tristanphan.stardict.toStringRepresentation
+import com.tristanphan.sdkl.StarDictVersion
+import com.tristanphan.sdkl.TypeIdentifier
+import com.tristanphan.sdkl.toStringRepresentation
 import java.io.File
 
 private const val MAGIC_DATA = "StarDict's dict ifo file"
 
 // TODO: Move common parameters from [InfoWriter] and [InfoReader] to a common one
-class InfoWriter(
+internal class InfoWriter(
     val file: File,
     val version: StarDictVersion = StarDictVersion.V3_0_0,
     val bookname: String,

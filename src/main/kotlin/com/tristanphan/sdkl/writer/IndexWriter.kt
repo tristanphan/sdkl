@@ -1,16 +1,16 @@
-package com.tristanphan.stardict.writer
+package com.tristanphan.sdkl.writer
 
-import com.tristanphan.stardict.StarDictVersion
-import com.tristanphan.utilities.caselessComparator
-import com.tristanphan.utilities.combineNavigableSets
-import com.tristanphan.utilities.longToBigEndianByteArray
+import com.tristanphan.sdkl.StarDictVersion
+import com.tristanphan.sdkl.utilities.caselessComparator
+import com.tristanphan.sdkl.utilities.combineNavigableSets
+import com.tristanphan.sdkl.utilities.longToBigEndianByteArray
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
 private const val DEFAULT_SIZE_BITS = 32
 
-class IndexWriter(val file: File, val info: InfoWriter) {
+internal class IndexWriter(val file: File, val info: InfoWriter) {
 
     val words = TreeMap<String, Pair<Long, Int>>(caselessComparator)
     val aliases = TreeMap<String, String>(caselessComparator)

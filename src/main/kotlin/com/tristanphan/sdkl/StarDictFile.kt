@@ -1,4 +1,4 @@
-package com.tristanphan.stardict
+package com.tristanphan.sdkl
 
 import java.io.File
 

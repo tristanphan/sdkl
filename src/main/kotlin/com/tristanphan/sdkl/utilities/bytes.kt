@@ -1,9 +1,9 @@
-package com.tristanphan.utilities
+package com.tristanphan.sdkl.utilities
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-fun bigEndianByteArrayToLong(byteArray: ByteArray): Long {
+internal fun bigEndianByteArrayToLong(byteArray: ByteArray): Long {
     val littleEndianArray = byteArray.reversedArray()
     val paddedArray = littleEndianArray.copyOf(8)
     val buffer = ByteBuffer.wrap(paddedArray)
@@ -12,7 +12,7 @@ fun bigEndianByteArrayToLong(byteArray: ByteArray): Long {
     return buffer.getLong()
 }
 
-fun longToBigEndianByteArray(long: Long, arraySize: Int): ByteArray {
+internal fun longToBigEndianByteArray(long: Long, arraySize: Int): ByteArray {
     val buffer = ByteBuffer.allocate(8)
     // Using little endian because it will be reversed soon
     buffer.order(ByteOrder.LITTLE_ENDIAN)

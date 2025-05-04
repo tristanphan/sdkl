@@ -1,13 +1,13 @@
-package com.tristanphan.stardict.writer
+package com.tristanphan.sdkl.writer
 
-import com.tristanphan.stardict.TypeIdentifier
-import com.tristanphan.utilities.longToBigEndianByteArray
+import com.tristanphan.sdkl.TypeIdentifier
+import com.tristanphan.sdkl.utilities.longToBigEndianByteArray
 import java.io.BufferedOutputStream
 import java.io.File
 
 private const val SIZE_BITS = 32
 
-class DictWriter(file: File, info: InfoWriter) {
+internal class DictWriter(file: File, info: InfoWriter) {
     private val info: InfoWriter = info
     private var filePosition: Long = 0
     private val openFile: BufferedOutputStream

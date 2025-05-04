@@ -1,17 +1,19 @@
-package com.tristanphan.stardict.reader
+package com.tristanphan.sdkl
 
-import com.tristanphan.stardict.StarDictFile
-import com.tristanphan.stardict.TypeIdentifier
-import com.tristanphan.stardict.writer.StarDictWriter
-import com.tristanphan.utilities.ProgressTracker
+import com.tristanphan.sdkl.reader.DictReader
+import com.tristanphan.sdkl.reader.IndexReader
+import com.tristanphan.sdkl.reader.InfoReader
+import com.tristanphan.sdkl.utilities.ProgressTracker
 
 class StarDictReader(file: StarDictFile) : Iterable<String> {
-    internal val info: InfoReader = InfoReader(file.info)
+    private val info: InfoReader = InfoReader(file.info)
     private val index: IndexReader = IndexReader(file.index, info)
     private val dictionary: DictReader = DictReader(file.dict, info)
 
-    fun lookup(word: String): Map<TypeIdentifier, String>? {
-        val (offset, size) = index.words[word] ?: return null
+    fun lookup(word: String, caseInsensitive: Boolean = false): Map<TypeIdentifier, String>? {
+        val (offset, size) = index.words[word]
+            ?: index.lowercaseWordsIfNotExist[word.lowercase()]
+            ?: return null
         return dictionary.lookup(offset, size)
     }
 

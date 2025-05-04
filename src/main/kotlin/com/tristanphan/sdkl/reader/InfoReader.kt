@@ -1,13 +1,13 @@
-package com.tristanphan.stardict.reader
+package com.tristanphan.sdkl.reader
 
-import com.tristanphan.stardict.StarDictParseException
-import com.tristanphan.stardict.StarDictVersion
-import com.tristanphan.stardict.TypeIdentifier
+import com.tristanphan.sdkl.StarDictParseException
+import com.tristanphan.sdkl.StarDictVersion
+import com.tristanphan.sdkl.TypeIdentifier
 import java.io.File
 
 private const val MAGIC_DATA = "StarDict's dict ifo file"
 
-class InfoReader(file: File) {
+internal class InfoReader(file: File) {
     val version: StarDictVersion
     val bookname: String
     val wordcount: Int
@@ -70,12 +70,12 @@ class InfoReader(file: File) {
     }
 }
 
-fun parseLine(line: String): Pair<String, String> {
+private fun parseLine(line: String): Pair<String, String> {
     val segments = line.split("=", limit = 2)
     expect(segments.size == 2, "Expected %s=%s format")
     return Pair(segments[0], segments[1])
 }
 
-fun expect(condition: Boolean, errorMessage: String) {
+private fun expect(condition: Boolean, errorMessage: String) {
     if (!condition) throw StarDictParseException(errorMessage)
 }

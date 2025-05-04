@@ -1,4 +1,4 @@
-package com.tristanphan.stardict
+package com.tristanphan.sdkl
 
 enum class TypeIdentifier(val code: String) {
     MEANING("m"),

@@ -1,8 +1,8 @@
-package com.tristanphan.utilities
+package com.tristanphan.sdkl.utilities
 
 import java.util.*
 
-fun <T> combineNavigableSets(s1: NavigableSet<T>, s2: NavigableSet<T>): NavigableSet<T> {
+internal fun <T> combineNavigableSets(s1: NavigableSet<T>, s2: NavigableSet<T>): NavigableSet<T> {
     val set = TreeSet<T>()
 
     assert(s1.comparator() == s2.comparator())
